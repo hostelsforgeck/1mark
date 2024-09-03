@@ -48,12 +48,23 @@ def login():
 
     return render_template('login.html')
 
+from urllib.parse import unquote
+
 @app.route('/subject/<subject>')
 def subject(subject):
     if 'username' not in session:
         return redirect(url_for('login'))
-    modules = quizzes['S5'][subject].keys()
-    return render_template('subject.html', subject=subject, modules=modules)
+
+    # Decode the URL-encoded subject name
+    decoded_subject = unquote(subject)
+    
+    if decoded_subject not in quizzes['S5']:
+        flash('Subject not found.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    modules = quizzes['S5'][decoded_subject].keys()
+    return render_template('subject.html', subject=decoded_subject, modules=modules)
+
 
 @app.route('/subject/<subject>/module/<module>')
 def module(subject, module):
