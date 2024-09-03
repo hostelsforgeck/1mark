@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from urllib.parse import unquote
 from all_users import users
 from quizes import quizzes
 from datetime import datetime
@@ -48,8 +49,6 @@ def login():
 
     return render_template('login.html')
 
-from urllib.parse import unquote
-
 @app.route('/subject/<subject>')
 def subject(subject):
     if 'username' not in session:
@@ -65,26 +64,49 @@ def subject(subject):
     modules = quizzes['S5'][decoded_subject].keys()
     return render_template('subject.html', subject=decoded_subject, modules=modules)
 
-
 @app.route('/subject/<subject>/module/<module>')
 def module(subject, module):
     if 'username' not in session:
         return redirect(url_for('login'))
+
+    # Decode the URL-encoded subject and module names
+    decoded_subject = unquote(subject)
+    decoded_module = unquote(module)
+    
+    # Ensure the subject and module exist in the quizzes dictionary
+    if decoded_subject not in quizzes['S5']:
+        flash('Subject not found.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    if decoded_module not in quizzes['S5'][decoded_subject]:
+        flash('Module not found.', 'danger')
+        return redirect(url_for('subject', subject=decoded_subject))
     
     # Get the topics along with their titles
-    topics = quizzes['S5'][subject][module]
+    topics = quizzes['S5'][decoded_subject][decoded_module]
     topic_titles = {key: value['title'] for key, value in topics.items()}
     
-    return render_template('module.html', subject=subject, module=module, topics=topic_titles)
+    return render_template('module.html', subject=decoded_subject, module=decoded_module, topics=topic_titles)
 
 @app.route('/subject/<subject>/module/<module>/topic/<topic>', methods=['GET', 'POST'])
 def quiz(subject, module, topic):
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    quiz_data = quizzes['S5'][subject][module][topic]
-    total_questions = len(quiz_data['questions'])  # Get the total number of questions
+    # Decode the URL-encoded subject, module, and topic names
+    decoded_subject = unquote(subject)
+    decoded_module = unquote(module)
+    decoded_topic = unquote(topic)
 
+    # Ensure the subject, module, and topic exist in the quizzes dictionary
+    if decoded_subject not in quizzes['S5'] or \
+       decoded_module not in quizzes['S5'][decoded_subject] or \
+       decoded_topic not in quizzes['S5'][decoded_subject][decoded_module]:
+        flash('Quiz not found.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    quiz_data = quizzes['S5'][decoded_subject][decoded_module][decoded_topic]
+    total_questions = len(quiz_data['questions'])  # Get the total number of questions
 
     # Initialize session variables if not set
     if 'current_question' not in session:
@@ -125,7 +147,7 @@ def quiz(subject, module, topic):
             session.pop('current_question')
             return render_template('results.html', score=score, results=results)
 
-        return redirect(url_for('quiz', subject=subject, module=module, topic=topic))
+        return redirect(url_for('quiz', subject=decoded_subject, module=decoded_module, topic=decoded_topic))
 
     # Show the current question
     question_data = quiz_data['questions'][current_question]
