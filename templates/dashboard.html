@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <!-- Profile Section -->
+    <div class="profile">
+        <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_pic_id + '.jpg') }}" alt="Profile Photo" />
+        <div class="profile-details">
+            <h2 style="text-align: left !important;">{{ profile.name }}</h2>
+            <p style="text-align: left;">ID: {{ user_id }} <br>S{{ profile.semester }} {{ profile.department }}</p>
+        </div>
+    </div>
+    <div class="separator"></div>
+
+    <!-- Subject Selection -->
+    <h2>Select a Subject</h2>
+    <ul class="list-group">
+        {% for subject in subjects %}
+            <li class="list-group-item">
+                <a href="{{ url_for('subject', subject=subject) }}">{{ subject }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

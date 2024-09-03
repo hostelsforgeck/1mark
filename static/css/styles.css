@@ -1,0 +1,103 @@
+/* static/css/styles.css */
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+/* ======================================= */
+
+/* General Profile Section Styling */
+.profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    width: 100%;
+    flex-wrap: wrap; /* Allows items to wrap to a new line on small screens */
+    gap: 1.5rem; /* Adds space between image and text */
+}
+
+.profile img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem; /* Adds space between the elements in the profile details */
+}
+
+.profile-details h2 {
+    text-align: left;
+    font-size: 1.5rem;
+    color: #141a39;
+    margin: 0; /* Remove default margin for better spacing control */
+}
+
+.profile-details p {
+    font-size: 1rem;
+    color: #707070;
+    margin: 0; /* Remove default margin for better spacing control */
+}
+
+/* Separator styling */
+.separator {
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+    margin: 2rem 0; /* Add margin for spacing above and below */
+}
+
+/* Responsive adjustments */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile {
+        flex-direction: row;
+        align-items: center; /* Changed from center to flex-start */
+        text-align: left;
+    }
+
+    .profile img {
+        margin: 0;
+        margin-bottom: 0.1rem;
+        height: 130px;
+        width: 130px;
+    }
+
+    .profile-details {
+        align-items: flex-start; /* Changed from center to flex-start */
+        text-align: left;
+    }
+
+    .profile-details h2 {
+        text-align: left !important; /* Added !important to enforce left alignment */
+        font-size: 1.25rem;
+    }
+
+    .profile-details p {
+        font-size: 0.875rem;
+    }
+}
+
+

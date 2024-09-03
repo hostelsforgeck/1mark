@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Quiz Results</h2>
+    <p>Your score: {{ score }} out of {{ results | length }}</p>
+
+    <div class="list-group">
+        {% for result in results %}
+            <div class="list-group-item {% if result.correct %}list-group-item-success{% else %}list-group-item-danger{% endif %}">
+                <strong>{{ result.question }}</strong><br>
+                {% if not result.correct %}
+                    Correct answer: {{ result.correct_answer }}<br>
+                    Explanation: {{ result.description }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">Back to Dashboard</a>
+</div>
+
+{% if score == results | length %}
+<script>
+    // Trigger confetti
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+</script>
+{% endif %}
+{% endblock %}

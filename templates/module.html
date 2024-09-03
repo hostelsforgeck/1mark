@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ subject }} - {{ module }}</h2>
+    <ul class="list-group">
+        {% for topic_key, topic_title in topics.items() %}
+            <li class="list-group-item">
+                <a href="{{ url_for('quiz', subject=subject, module=module, topic=topic_key) }}">
+                    {{ loop.index }}) {{ topic_title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

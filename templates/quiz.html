@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ quiz_title }}</h2>    
+
+    <h5>Question {{ question_num }}/{{ total_questions }}</h5>
+    <form method="POST">
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ question.question }}</strong>
+            </div>
+            <div class="card-body">
+                {% for option in question.options %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" 
+                               name="answer" id="option-{{ loop.index }}" 
+                               value="{{ option }}" required>
+                        <label class="form-check-label" for="option-{{ loop.index }}">
+                            {{ option }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Next</button>
+    </form>
+</div>
+{% endblock %}
