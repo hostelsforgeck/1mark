@@ -219,7 +219,23 @@ quizzes = {
                         },
                     ],
                 },
-
+                # "Topic 2": {
+                #     "title": "Advanced HTML Concepts",
+                #     "questions": [
+                #         {
+                #             "question": "Which of the following is correct about HTML?",
+                #             "options": ["HTML uses User Defined Tags", "HTML uses tags defined within the language", "Both A and B", "None of the above"],
+                #             "answer": "HTML uses tags defined within the language",
+                #             "description": "HTML uses a set of predefined tags defined within the language to structure web content."
+                #         },
+                #         {
+                #             "question": "What is the purpose of the <head> tag in HTML?",
+                #             "options": ["To contain the title of the document", "To contain meta-information", "To link external resources", "All of the above"],
+                #             "answer": "All of the above",
+                #             "description": "The <head> tag is used to contain meta-information, titles, and links to external resources like CSS files."
+                #         },
+                #     ],
+                # }
             },
             "Module 2": {
                 "Topic 1": {

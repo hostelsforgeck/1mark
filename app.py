@@ -113,8 +113,10 @@ def quiz(subject, module, topic):
         session['current_question'] = 0
         session['score'] = 0
         session['results'] = []
+        session['attempted'] = False  # Track if the question was attempted before showing explanation
 
     current_question = session['current_question']
+    show_description = False
 
     # Handle form submission
     if request.method == 'POST':
@@ -123,31 +125,41 @@ def quiz(subject, module, topic):
         description = quiz_data['questions'][current_question]['description']
 
         if user_answer == correct_answer:
-            session['score'] += 1
-            session['results'].append({
-                'question': quiz_data['questions'][current_question]['question'],
-                'correct': True,
-            })
+            if not session['attempted']:  # If it's the first attempt
+                session['score'] += 1
+                session['results'].append({
+                    'question': quiz_data['questions'][current_question]['question'],
+                    'correct': True,
+                })
+                session['current_question'] += 1  # Move to the next question
+            else:
+                # Move to the next question without incrementing the score
+                session['results'][-1]['correct'] = False  # Ensure the last entry is marked as incorrect
+                session['results'][-1]['description'] = description
+                session['results'][-1]['correct_answer'] = correct_answer
+                session['current_question'] += 1
+            session['attempted'] = False  # Reset for the next question
         else:
-            session['results'].append({
-                'question': quiz_data['questions'][current_question]['question'],
-                'correct': False,
-                'correct_answer': correct_answer,
-                'description': description,
-            })
+            if not session['attempted']:
+                # Add the wrong answer to the results and show the description
+                session['results'].append({
+                    'question': quiz_data['questions'][current_question]['question'],
+                    'correct': False,
+                    'correct_answer': correct_answer,
+                    'description': description,
+                })
+            show_description = True
+            session['attempted'] = True  # Mark that the question was attempted and failed
 
-        # Move to the next question
-        session['current_question'] += 1
         current_question = session['current_question']
 
         # If the quiz is finished
-        if current_question >= len(quiz_data['questions']):
+        if current_question >= total_questions:
             score = session.pop('score')
             results = session.pop('results')
             session.pop('current_question')
-            return render_template('results.html', score=score, results=results)
-
-        return redirect(url_for('quiz', subject=decoded_subject, module=decoded_module, topic=decoded_topic))
+            session.pop('attempted')  # Clean up
+            return render_template('results.html', score=score, results=results, total_questions=total_questions)
 
     # Show the current question
     question_data = quiz_data['questions'][current_question]
@@ -156,7 +168,8 @@ def quiz(subject, module, topic):
                             quiz_title=quiz_data['title'],
                             question=question_data,
                             question_num=current_question + 1,
-                            total_questions=total_questions
+                            total_questions=total_questions,
+                            show_description=show_description  # Pass this flag to the template
     )
 
 @app.route('/logout')
