@@ -2,7 +2,18 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Quiz Results</h2>
-    <p>Your score: {{ score }} out of {{ results | length }}</p>
+    <p>Your score: <strong>{{ score }} out of {{ results | length }}</strong></p>
+
+
+    {% set motivational_phrases = ["Try again—you’ve got this!", "Practice makes perfect!", "Keep going—you’re improving!", "Mistakes are proof that you're trying!"] %}
+    {% if (score != (results | length)) %}
+        <div style="text-align: center;">
+            <i><strong>{{ motivational_phrases | random }}</strong></i>
+        </div>
+        <br>
+    {% endif %}
+
+
 
     <div class="list-group">
         {% for result in results %}

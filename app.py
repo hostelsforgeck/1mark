@@ -10,17 +10,17 @@ app.secret_key = 'your_secret_key'  # Replace with a strong secret key
 
 @app.route('/')
 def home():
-    if 'username' in session:
+    if session.get('username'):  # Check session using .get()
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
 @app.route('/dashboard')
 def dashboard():
-    if 'username' not in session:
+    if not session.get('username'):  # Check session using .get()
         return redirect(url_for('login'))
     
     # Get the current user
-    username = session['username']
+    username = session.get('username')
     user = users.get(username)
     
     # Fetch subjects for the dashboard
@@ -31,7 +31,7 @@ def dashboard():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'username' in session:
+    if session.get('username'):  # Check session using .get()
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
@@ -51,7 +51,7 @@ def login():
 
 @app.route('/subject/<subject>')
 def subject(subject):
-    if 'username' not in session:
+    if not session.get('username'):  # Check session using .get()
         return redirect(url_for('login'))
 
     # Decode the URL-encoded subject name
@@ -66,31 +66,28 @@ def subject(subject):
 
 @app.route('/subject/<subject>/module/<module>')
 def module(subject, module):
-    if 'username' not in session:
+    if not session.get('username'):  # Check session using .get()
         return redirect(url_for('login'))
 
     # Decode the URL-encoded subject and module names
     decoded_subject = unquote(subject)
     decoded_module = unquote(module)
     
-    # Ensure the subject and module exist in the quizzes dictionary
-    if decoded_subject not in quizzes['S5']:
-        flash('Subject not found.', 'danger')
-        return redirect(url_for('dashboard'))
+    # Simplify quiz data access logic
+    module_data = quizzes['S5'].get(decoded_subject, {}).get(decoded_module, {})
     
-    if decoded_module not in quizzes['S5'][decoded_subject]:
+    if not module_data:
         flash('Module not found.', 'danger')
         return redirect(url_for('subject', subject=decoded_subject))
     
     # Get the topics along with their titles
-    topics = quizzes['S5'][decoded_subject][decoded_module]
-    topic_titles = {key: value['title'] for key, value in topics.items()}
+    topic_titles = {key: value['title'] for key, value in module_data.items()}
     
     return render_template('module.html', subject=decoded_subject, module=decoded_module, topics=topic_titles)
 
 @app.route('/subject/<subject>/module/<module>/topic/<topic>', methods=['GET', 'POST'])
 def quiz(subject, module, topic):
-    if 'username' not in session:
+    if not session.get('username'):  # Check session using .get()
         return redirect(url_for('login'))
 
     # Decode the URL-encoded subject, module, and topic names
@@ -98,24 +95,22 @@ def quiz(subject, module, topic):
     decoded_module = unquote(module)
     decoded_topic = unquote(topic)
 
-    # Ensure the subject, module, and topic exist in the quizzes dictionary
-    if decoded_subject not in quizzes['S5'] or \
-       decoded_module not in quizzes['S5'][decoded_subject] or \
-       decoded_topic not in quizzes['S5'][decoded_subject][decoded_module]:
+    # Simplify quiz data access logic
+    quiz_data = quizzes['S5'].get(decoded_subject, {}).get(decoded_module, {}).get(decoded_topic, None)
+
+    if not quiz_data:
         flash('Quiz not found.', 'danger')
         return redirect(url_for('dashboard'))
 
-    quiz_data = quizzes['S5'][decoded_subject][decoded_module][decoded_topic]
     total_questions = len(quiz_data['questions'])  # Get the total number of questions
 
-    # Initialize session variables if not set
-    if 'current_question' not in session:
-        session['current_question'] = 0
-        session['score'] = 0
-        session['results'] = []
-        session['attempted'] = False  # Track if the question was attempted before showing explanation
+    # Set default values if keys don't exist in session
+    session.setdefault('current_question', 0)
+    session.setdefault('score', 0)
+    session.setdefault('results', [])
+    session.setdefault('attempted', False)  # Track if the question was attempted before showing explanation
 
-    current_question = session['current_question']
+    current_question = session.get('current_question')
     show_description = False
 
     # Handle form submission
@@ -125,7 +120,7 @@ def quiz(subject, module, topic):
         description = quiz_data['questions'][current_question]['description']
 
         if user_answer == correct_answer:
-            if not session['attempted']:  # If it's the first attempt
+            if not session.get('attempted'):  # If it's the first attempt
                 session['score'] += 1
                 session['results'].append({
                     'question': quiz_data['questions'][current_question]['question'],
@@ -140,7 +135,7 @@ def quiz(subject, module, topic):
                 session['current_question'] += 1
             session['attempted'] = False  # Reset for the next question
         else:
-            if not session['attempted']:
+            if not session.get('attempted'):
                 # Add the wrong answer to the results and show the description
                 session['results'].append({
                     'question': quiz_data['questions'][current_question]['question'],
@@ -151,7 +146,7 @@ def quiz(subject, module, topic):
             show_description = True
             session['attempted'] = True  # Mark that the question was attempted and failed
 
-        current_question = session['current_question']
+        current_question = session.get('current_question')
 
         # If the quiz is finished
         if current_question >= total_questions:
@@ -174,10 +169,7 @@ def quiz(subject, module, topic):
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
-    session.pop('current_question', None)
-    session.pop('score', None)
-    session.pop('results', None)
+    session.clear()  # Clear all session data
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
