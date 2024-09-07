@@ -1,6 +1,16 @@
 # all_users.py
 
 users = {
+
+"teacher_wp": {
+    "pword": "12341234",
+    "name": "SHAJILA MISS",
+    "profile_pic_id": "t_wp",
+    "semester": "5",
+    "department": "Computer Science",
+    "login_record": [],
+},
+
 "KKE22CSD001": {
     "pword": "12341234",
     "name": "ABHINAND PK",
